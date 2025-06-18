@@ -1,0 +1,172 @@
+﻿@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Para Transferi";
+}
+<br />
+<h2 class="text-center">Para Transferi</h2>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form id="TransferForm" method="post">
+
+            <div class="mb-3">
+                <label class="form-label">Hesap No</label>
+                <select class="form-select short-input" id="AccountNumber" name="AccountNumber" required>
+                    <option value="">Hesap No seçiniz</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Müşteri Numaranız</label>
+                <input type="text" class="form-control short-input" id="CustomerNumber" name="CustomerNumber" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Bakiyeniz</label>
+                <input type="text" class="form-control short-input" id="Balance" name="Balance" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Transfer Türü Seçniz</label>
+                <select class="form-select short-input" id="Transaction" name="Transaction" required>
+                    <option value="4">EFT</option>
+                    <option value="3">Havale</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Para Transferi Yapılacak Iban</label>
+                <input type="text" class="form-control short-input" id="Iban" name="Iban" required />
+            </div>
+
+            
+            <div class="mb-3">
+                <label class="form-label">Transfer Miktarı</label>
+                <input type="number" class="form-control short-input" id="Amount" name="Amount" required />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Açıklama</label>
+                <input type="text" class="form-control short-input" id="Description" name="Description" required />
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-lg">Para Transferi Gerçekleştir</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+    let allAccounts = [];
+
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const token = sessionStorage.getItem("jwtToken");
+        const decoded = parseJwt(token);
+        const userId = decoded?.UserId;
+        const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        const accountSelect = document.getElementById("AccountNumber");
+        const ibanInput = document.getElementById("Iban");
+        const balanceInput = document.getElementById("Balance");
+        const customerNumberInput = document.getElementById("CustomerNumber");
+
+        try {
+            // const res = await fetch("https://localhost:7060/api/Customer/GetAccountsForDeposit", {
+            const res = await fetch("https://localhost:7060/api/Customer/GetAccountsForDeposit", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            allAccounts = await res.json();
+
+            allAccounts.forEach(account => {
+                const option = document.createElement("option");
+                option.value = account.accountNumber;
+                option.textContent = account.accountNumber;
+                accountSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error("Hesaplar alınamadı:", err);
+            alert("Hesaplar yüklenemedi.");
+        }
+
+            accountSelect.addEventListener("change", function () {
+        const selected = allAccounts.find(acc => acc.accountNumber === this.value);
+        if (selected) {
+            balanceInput.value = selected.balance;
+            customerNumberInput.value = selected.customerNumber;
+        } else {
+            balanceInput.value = "";
+            customerNumberInput.value = "";
+        }
+    });
+
+
+        document.getElementById("TransferForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const selected = allAccounts.find(acc => acc.accountNumber === accountSelect.value);
+            if (!selected) {
+                alert("Lütfen geçerli bir hesap seçin.");
+                return;
+            }
+
+            const dto = {
+                AccountNumber: selected.accountNumber,
+                Iban: document.getElementById("Iban").value,
+                Balance: selected.balance,
+                Amount: parseFloat(document.getElementById("Amount").value),
+                Description: document.getElementById("Description").value,
+                Transaction: parseInt(document.getElementById("Transaction").value),
+                ToAccountIBAN: document.getElementById("Iban").value,
+                PerformedByUserId: role === "BankTeller" ? userId : selected.userId
+            };
+
+            try {
+                // const res = await fetch("https://localhost:7060/api/Customer/Transfer", {
+                const res = await fetch("https://localhost:7060/api/Customer/Transfer", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(dto)
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    alert("Para transferi başarılı.");
+                    window.location.href = "/UserPage/Index";
+                } else {
+                    let errorMessage = "Hata oluştu.";
+                    if (result.errors) {
+                        const allErrors = Object.values(result.errors).flat();
+                        errorMessage = allErrors.join("\n");
+                    } else if (result.message) {
+                        errorMessage = result.message;
+                    }
+                    alert("Hata:\n" + errorMessage);
+                }
+            } catch (err) {
+                console.error("İstek hatası:", err);
+                alert("İstek gönderilirken hata oluştu.");
+            }
+        });
+    });
+</script>

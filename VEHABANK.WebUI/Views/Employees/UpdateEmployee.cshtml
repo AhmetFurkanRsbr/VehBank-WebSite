@@ -1,0 +1,134 @@
+﻿@model VEHABANK.Shared.Dto.EmployeeDto
+
+@{
+    ViewData["Title"] = "Personel Bilgisi Güncelle";
+    Layout = "_UserPageLayout"; 
+}
+
+<h2 class="text-center">Personel Bilgisi Güncelle</h2>
+<hr />
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <form id="updateEmployeeForm">
+            <input type="hidden" id="Id" value="@Model.Id" />
+
+            <div class="mb-3">
+                <label class="form-label">Ad</label>
+                <input type="text" class="form-control" id="Name" value="@Model.Name" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Soyad</label>
+                <input type="text" class="form-control" id="Surname" value="@Model.Surname"  />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" id="Email" value="@Model.Email" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Telefon</label>
+                <input type="text" class="form-control" id="Phone" value="@Model.Phone" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Şube</label>
+                <select class="form-select short-input" id="BranchId" name="@Model.BranchId" required>
+                    <option value="">Şube seçiniz</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" value="@Model.Authorization">Yetki</label>
+                <select class="form-select short-input" id="Authorization"  name="Authorization" required>
+                    <option value="0">Üst Düzey Yönetici</option>
+                    <option value="1">Şube Yöneticisi</option>
+                    <option value="2">Gişe Görevlisi</option>
+                </select>
+            </div>
+            
+
+            <div class="mb-3">
+                <label class="form-label">Personel No</label>
+                <input type="text" class="form-control" id="CustomerNumber" value="@Model.CustomerNumber" readonly />
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+                <a asp-action="ManageEmployees" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("updateEmployeeForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const dto = {
+                Id: document.getElementById("Id").value,
+                Name: document.getElementById("Name").value,
+                Surname: document.getElementById("Surname").value,
+                Email: document.getElementById("Email").value,
+                Phone: document.getElementById("Phone").value,
+                BranchId: parseInt(document.getElementById("BranchId").value),
+                CustomerNumber: document.getElementById("CustomerNumber").value,
+                Authorization: parseInt(document.getElementById("Authorization").value)
+            };
+
+            try {
+                // const response = await fetch("https://localhost:7060/api/Employees/Update", {
+                const response = await fetch("https://localhost:7060/api/Employees/Update", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(dto)
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Güncelleme başarılı.");
+                    window.location.href = "/Employees/ManageEmployees";
+                } else {
+                    alert("Hata: " + (result.message || "Güncelleme başarısız."));
+                }
+            } catch (err) {
+                console.error("İstek hatası:", err);
+                alert("Bir hata oluştu.");
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const branchSelect = document.getElementById("BranchId");
+            const modelBranchId = @Model.BranchId;
+
+            try {
+                // const branchRes = await fetch("https://localhost:7060/api/Branches/GetAllBranches");
+                const branchRes = await fetch("https://localhost:7060/api/Branches/GetAllBranches");
+                const branches = await branchRes.json();
+                branches.forEach(branch => {
+                    const option = document.createElement("option");
+                    option.value = branch.id;
+                    option.textContent = branch.name;
+                    if (branch.id === modelBranchId) {
+                        option.selected = true;
+                    }
+                    branchSelect.appendChild(option);
+                });
+            } catch {
+                const option = document.createElement("option");
+                option.textContent = "Şubeler yüklenemedi";
+                branchSelect.appendChild(option);
+            }
+
+            // Yetkiyi modelden alınan değere göre seçili yap
+            const modelAuthorization = @Model.Authorization;
+            const authorizationSelect = document.getElementById("Authorization");
+            authorizationSelect.value = modelAuthorization;
+        });
+    </script>
+}

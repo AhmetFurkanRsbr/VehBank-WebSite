@@ -1,0 +1,45 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build sonuçları
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+*.log
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Dotnet yayınlama çıktısı
+publish/
+out/
+
+# NuGet paketleri
+*.nupkg
+*.snupkg
+packages/
+
+# Kestrel development sertifikaları
+*.pfx
+*.key
+
+# VSCode ayarları
+.vscode/
+
+# Sistem dosyaları
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# MacOS dosyaları
+.DS_Store
+
+# Git yedekleme dosyaları
+*.orig

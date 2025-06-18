@@ -1,0 +1,94 @@
+@* UserPage özel layout *@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>@ViewData["Title"] - VEHABANK</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="/UserPage/kaiadmin-lite-1.2.0/assets/img/kaiadmin/favicon.ico" type="image/x-icon" />
+    <!-- Fonts and icons -->
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["~/UserPage/kaiadmin-lite-1.2.0/assets/css/fonts.min.css"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/demo.css" />
+    @await RenderSectionAsync("Styles", required: false)<!--hamzadan-->
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        @await Component.InvokeAsync("_DefaultSidebarComponentPartial")
+        <!-- End Sidebar -->
+        <div class="main-panel">
+            <div class="main-header">
+                <div class="main-header-logo">
+                    <!-- Logo Header -->
+                    <div class="logo-header" data-background-color="dark">
+                        <a href="/UserPage/kaiadmin-lite-1.2.0/index.html" class="logo">
+                            <img src="/UserPage/kaiadmin-lite-1.2.0/assets/img/kaiadmin/logo_light.svg" alt="navbar brand" class="navbar-brand" height="20" />
+                        </a>
+                        <div class="nav-toggle">
+                            <button class="btn btn-toggle toggle-sidebar">
+                                <i class="gg-menu-right"></i>
+                            </button>
+                            <button class="btn btn-toggle sidenav-toggler">
+                                <i class="gg-menu-left"></i>
+                            </button>
+                        </div>
+                        <button class="topbar-toggler more">
+                            <i class="gg-more-vertical-alt"></i>
+                        </button>
+                    </div>
+                    <!-- End Logo Header -->
+                </div>
+                <!-- Navbar Header -->
+                <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
+                    <div class="container-fluid">
+                        <nav class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <button type="submit" class="btn btn-search pe-1">
+                                        <i class="fa fa-search search-icon"></i>
+                                    </button>
+                                </div>
+                                <input type="text" placeholder="Search ..." class="form-control" />
+                            </div>
+                        </nav>
+                        <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                            <!-- ... üst barın dropdown ve diğer menüleri ... -->
+                            @* Buraya Index.cshtml'den alınan üst barın kalan kodları eklenebilir *@
+                        </ul>
+                    </div>
+                </nav>
+                <!-- End Navbar -->
+            </div>
+            <div class="container">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/core/jquery.3.2.1.min.js"></script>
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/core/popper.min.js"></script>
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/core/bootstrap.min.js"></script>
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/plugins.min.js"></script>
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/kaiadmin.min.js"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html> 

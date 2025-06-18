@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>VehaBank-Kayıt Ol</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" rel="stylesheet">
+    <link href="/Register/css/StyleSheet.css" rel="stylesheet" />
+</head>
+<body style="background-color: white">
+
+    <div class="container register">
+        @* <form asp-action="Register" method="post" action="https://localhost:7060/api/Auths/register"> *@
+        @* <form action="https://localhost:7060/api/Auths/register" method="post"> *@
+        <form id="registerForm" method="post">
+            <div class="row">
+                <div class="col-md-3 register-left">
+                    <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
+                    <h3>Hoşgeldiniz</h3>
+                    <p>İki Faktörlü Doğrulama İle Hesabın Güvende</p>
+                    <a href="/Account/Login">
+                        <input type="button" value="Giriş Yap" />
+                    </a>
+                </div>
+                <div class="col-md-9 register-right">
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <h3 class="register-heading">Müşterimiz olmana çok az kaldı</h3>
+                            <div class="row register-form">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="name" name="Name" placeholder="İsim *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="surname" name="Surname" placeholder="Soyisim *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="identityNumber" name="IdentityNumber" placeholder="TC Kimlik No *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="birthDate" name="BirthDate" placeholder="Doğum Tarihi (gün-ay-yıl) *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" id="password" name="Password" placeholder="Parola *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="password" class="form-control" id="password" name="ConfirmPassword" placeholder="Parola Tekrarı *" value="" required />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <input type="email" class="form-control" id="email" name="Email" placeholder="Email *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" minlength="10" maxlength="10" class="form-control" id="phone" name="Phone" placeholder="Telefon (534..) *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <select class="form-control" id="securityQuestion" name="AuthenticateQuestion">
+                                            <option class="hidden" selected disabled>Lütfen güvenlik doğrulama sorunuzu seçin</option>
+                                            <option value=" İlkokul_Öğretmeninin_Adı">İlkokul Öğretmeninin Adı?</option>
+                                            <option value=" Küçükken_Sahip_Olduğunuz_EvcilHayvanın_Adı">Küçükken sahip olduğun evcil hayvanın adı?</option>
+                                            <option value=" En_Sevdiğin_Gezegen">En sevdiğin gezegen?</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" id="securityAnswer" name="AuthenticateAnswerForQuestion" placeholder="Cevabınızı Girin *" value="" required />
+                                    </div>
+                                    <div class="form-group">
+                                        <select class="form-control" id="branch" name="BranchName">
+                                            <option class="hidden" selected disabled>Şube Seçiniz</option>
+                                            <option>Bakırköy</option>
+                                            <option>Çorlu</option>
+                                            <option>Ergene</option>
+                                            <option>Beşiktaş</option>
+                                            <option>Keçiören</option>
+                                            <option>Kadıköy</option>
+                                            <option>Kızılay</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit"  class="btnRegister" href="/Account/Email" >Kayıt Ol</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+ 
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            
+            let formData = new FormData(this);
+            let formObject = {};
+            formData.forEach((value, key) => {
+                formObject[key] = value;
+            });
+
+            localStorage.setItem("pendingRegistration", JSON.stringify(formObject)); // KAYIT BURADA
+
+            // Doğrulama kodunu gönder
+            try {
+                var nameSurnameValue = document.getElementById("name").value.toString() + " "+ document.getElementById("surname").value.toString()
+                // const response = await fetch("https://localhost:7060/api/Auths/send-code", {
+                const response = await fetch("https://localhost:7060/api/Auths/send-code", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ 
+                        email: formObject.Email,
+                        nameSurname: nameSurnameValue
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Doğrulama kodu e-posta adresinize gönderildi.");
+                    window.location.href = 'https://localhost:7205/Account/VerifyEmail?email=' + formObject.Email;
+                } else {
+                    alert("Kod gönderimi başarısız: " + data.message);
+                }
+            } catch (error) {
+                console.error("Kod gönderimi hatası:", error);
+                alert("Bir hata oluştu.");
+            }
+        });
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Personel Yönetimi";
+    Layout = "_UserPageLayout";
+}
+<br />
+<h2 class="text-center">Personel Yönetimi</h2>
+<br />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show short-input" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<style>
+    .short-input {
+    max-width: 400px;
+    }
+</style>
+
+<div class="text-end mb-3">
+    <a class="btn btn-success" href="/Employees/AddEmployee">Yeni Çalışan Ekle</a>
+</div>
+
+<table class="table table-bordered table-striped text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>Personel No</th>
+            <th>Ad-Soyad</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Şube</th>
+            <th>Yetki</th>
+            <th>İşlemler</th>
+        </tr>
+    </thead>
+    <tbody id="employeeTableBody">
+        <!-- JS ile doldurulacak -->
+    </tbody>
+</table>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const token = sessionStorage.getItem("jwtToken");
+		const token2 = localStorage.getItem("jwtToken");
+        // "Authorization": `Bearer ${token}`,
+        try {
+            // const response = await fetch("https://localhost:7060/api/Employees", {
+            const response = await fetch("https://localhost:7060/api/Employees", {
+                method: "GET",
+                headers: {
+                    
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) throw new Error("Yetkisiz erişim");
+
+            const employees = await response.json();
+            const tbody = document.getElementById("employeeTableBody");
+            tbody.innerHTML = "";
+
+            employees.forEach(emp => {
+                let authText = "";
+                switch (emp.authorization) {
+                    case 0: authText = "Üst Düzey Yönetici"; break;
+                    case 1: authText = "Şube Yöneticisi"; break;
+                    case 2: authText = "Gişe Memuru"; break;
+                }
+
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${emp.customerNumber}</td>
+                    <td>${emp.name} ${emp.surname}</td>
+                    <td>${emp.email}</td>
+                    <td>${emp.phone}</td>
+                    <td>${emp.branchName}</td>
+                    <td>${authText}</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" href="/Employees/UpdateEmployee/${emp.id}">Düzenle</a>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEmployee(${emp.id})">Sil</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (err) {
+            console.error(err);
+            alert("Veri alınamadı veya yetkisiz erişim.");
+        }
+    });
+
+    async function deleteEmployee(id) {
+        if (!confirm("Bu çalışanı silmek istediğinize emin misiniz?")) return;
+
+        const token = sessionStorage.getItem("jwtToken");
+        // "Authorization": `Bearer ${token}`,
+        try {
+            // const response = await fetch(`https://localhost:7060/api/Employees/Delete/${id}`, {
+            const response = await fetch(`https://localhost:7060/api/Employees/Delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) throw new Error("Silme işlemi başarısız");
+
+            alert("Silme işlemi başarılı");
+            location.reload();
+        } catch (err) {
+            console.error(err);
+            alert("Silme işlemi sırasında bir hata oluştu.");
+        }
+    }
+</script>

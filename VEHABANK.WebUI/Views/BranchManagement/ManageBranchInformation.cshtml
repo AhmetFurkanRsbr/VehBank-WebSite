@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Şube Bilgisi Yönet";
+}
+<br />
+<h2 class="text-center">Şube Bilgisi Yönet</h2>
+<br />
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show short-input" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<br />
+
+<style>
+    .short-input {
+        max-width: 400px;
+    }
+</style>
+
+
+<div class="row justify-content-center">
+  <div class="col-md-6">
+     <form id="updateBranchForm" method="post">
+          <div class="mb-3">
+            <label class="form-label">Şube İsim</label>
+                <select asp-items="ViewBag.BranchList" class="form-select" id="BranchId" name="BranchId" required>
+                    <option>Şube seçiniz</option>
+                </select>
+          </div>
+
+
+
+          <div class="mb-3">
+            <label class="form-label">Şube Şehir</label>
+            <input type="text" class="form-control"
+                   id="City" name="City"
+                   required maxlength="50"
+                   pattern="[A-Za-zçÇğĞıİöÖşŞüÜ\s]+"
+                   title="Lütfen geçerli bir şehir adı giriniz (sadece harf)." />
+          </div>
+
+          <div class="mb-3">
+             <label class="form-label">Şube Adres</label>
+              <input type="text" class="form-control"
+               id="Address" name="Address"
+               required maxlength="150"
+               title="Lütfen geçerli bir adres  giriniz (max 150 karakter)." />
+          </div>
+
+
+          <div class="mb-3">
+            <label class="form-label">Şube Mail</label>
+            <input type="email" class="form-control"
+                   id="Email" name="Email"
+                   required maxlength="100"
+                   title="Geçerli bir e-posta adresi giriniz." />
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Şube Telefon</label>
+              <input type="tel" class="form-control"
+                   id="Phone" name="Phone"
+                   required maxlength="10"
+                   pattern="[1-9][0-9]*"
+                   title="Format: 5369707434 şeklinde olmalı." />
+          </div>
+
+          <div class="text-center mt-4">
+             <button type="submit" class="btn btn-primary btn-lg">Şube Bilgisi Güncelle</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+
+<script>
+    document.getElementById("updateBranchForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+             const branchId = parseInt(document.getElementById("BranchId").value);
+       if (isNaN(branchId)) {
+          alert("Lütfen geçerli bir şube seçin.");
+         return;
+       }
+
+
+        const dto = {
+            Id: parseInt(document.getElementById("BranchId").value),
+            City: document.getElementById("City").value,
+            Email: document.getElementById("Email").value,
+            Address: document.getElementById("Address").value, 
+            Phone: document.getElementById("Phone").value
+        };
+
+        console.log("Gönderilen veri:", JSON.stringify(dto));
+        try {
+            // const response = await fetch("https://localhost:7060/api/Branches/UpdateBranch", {
+            const response = await fetch("https://localhost:7060/api/Branches/UpdateBranch", {
+                method: "POST",
+                headers: {
+					
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(dto)
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert("Güncelleme başarılı.");
+                window.location.href = "/BranchManagement/Index";
+            } else {
+                alert("Hata: " + (result.message || "Güncelleme başarısız."));
+            }
+        } catch (err) {
+            console.error("İstek hatası:", err);
+            alert("Bir hata oluştu.");
+        }
+    });
+</script>

@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Email Doğrulama";
+    Layout = null;
+
+    var emailParam = Context.Request.Query["email"].ToString();  // Razor tarafında email parametresini al
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <title>VEHA Bank - E-posta Doğrulama</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to right, #003973, #e5e5be);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h2 {
+            color: #003973;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: 500;
+            text-align: left;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background-color: #003973;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+            button:hover {
+                background-color: #002750;
+            }
+
+        .message {
+            margin-top: 15px;
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>E-posta Doğrulama</h2>
+        <form id="verifyForm">
+            <input type="hidden" id="email" value="@emailParam" />
+            <label for="code">Doğrulama Kodu:</label>
+            <input type="text" id="code" placeholder="123456" required />
+            <button type="submit">Doğrula</button>
+            <div class="message" id="messageArea"></div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById("verifyForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const code = document.getElementById("code").value;
+            const messageArea = document.getElementById("messageArea");
+
+            if (!email || !code) {
+                messageArea.textContent = "E-posta veya doğrulama kodu boş olamaz.";
+                return;
+            }
+
+            try {
+                // const verifyResponse = await fetch("https://localhost:7060/api/Auths/verify-code", {
+                const verifyResponse = await fetch("https://localhost:7060/api/Auths/verify-code", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, code })
+                });
+
+                if (verifyResponse.ok) {
+                    const userData = JSON.parse(localStorage.getItem("pendingRegistration"));
+                    if (!userData) {
+                        messageArea.textContent = "Kayıt bilgileri bulunamadı. Lütfen tekrar deneyin.";
+                        return;
+                    }
+
+                    // const registerResponse = await fetch("https://localhost:7060/api/Auths/register", {
+                    const registerResponse = await fetch("https://localhost:7060/api/Auths/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(userData)
+                    });
+
+                    if (registerResponse.ok) {
+                        localStorage.removeItem("pendingRegistration");
+                        window.location.href = "/Account/Login";
+                    } else {
+                        const data = await registerResponse.json();
+                        messageArea.textContent = "Kayıt başarısız: " + (data.message || "Bilinmeyen bir hata");
+                    }
+                } else {
+                    messageArea.textContent = "Kod doğrulaması başarısız.";
+                }
+            } catch (error) {
+                messageArea.textContent = "Bir hata oluştu: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

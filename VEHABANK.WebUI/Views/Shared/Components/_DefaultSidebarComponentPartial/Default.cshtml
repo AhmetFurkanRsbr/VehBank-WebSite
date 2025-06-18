@@ -1,0 +1,198 @@
+﻿
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>VEHABANK</title>
+    <meta content="width=device-width, initial-scale=1.0, shrink-to-fit=no" name="viewport" />
+    <link rel="icon" href="/UserPage/kaiadmin-lite-1.2.0/assets/img/kaiadmin/favicon.ico" type="image/x-icon" />
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Fonts and icons -->
+    <script src="/UserPage/kaiadmin-lite-1.2.0/assets/js/plugin/webfont/webfont.min.js"></script>
+    <script>
+        WebFont.load({
+          google: { families: ["Public Sans:300,400,500,600,700"] },
+          custom: {
+            families: [
+              "Font Awesome 5 Solid",
+              "Font Awesome 5 Regular",
+              "Font Awesome 5 Brands",
+              "simple-line-icons",
+            ],
+            urls: ["/UserPage/kaiadmin-lite-1.2.0/assets/css/fonts.min.css"],
+          },
+          active: function () {
+            sessionStorage.fonts = true;
+          },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/kaiadmin.min.css" />
+    <link rel="stylesheet" href="/UserPage/kaiadmin-lite-1.2.0/assets/css/demo.css" />
+</head>
+
+<body>
+    <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+            <div class="logo-header" data-background-color="dark">
+                <h1 style="color: white;">VEHABANK</h1>
+                <div class="nav-toggle">
+                    <button class="btn btn-toggle toggle-sidebar">
+                        <i class="gg-menu-right"></i>
+                    </button>
+                    <button class="btn btn-toggle sidenav-toggler">
+                        <i class="gg-menu-left"></i>
+                    </button>
+                </div>
+                <button class="topbar-toggler more">
+                    <i class="gg-more-vertical-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+            <div class="sidebar-content">
+                <ul id="dynamicSidebar" class="nav nav-secondary">
+                    <!-- Dinamik içerik buraya JS ile eklenecek -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                console.error("Token parse hatası:", e);
+                return null;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const token = sessionStorage.getItem("jwtToken") || localStorage.getItem("jwtToken");
+            const sidebar = document.getElementById("dynamicSidebar");
+            if (!token || !sidebar) return;
+
+            const payload = parseJwt(token);
+            const roleKey = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role";
+            const userRole = payload ? payload[roleKey] || payload.role : null;
+
+            const baseItems = `
+                <li class="nav-item">
+                    <a href="/UserPage/Index">
+                        <i class="fas fa-home"></i>
+                        <p>Anasayfa</p>
+                    </a>
+                </li>
+            `;
+
+            const items = {
+                "Customer": `
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#paraIslemleri"><i class="fas fa-money-bill"></i><p>Para İşlemleri</p><span class="caret"></span></a>
+                        <div class="collapse" id="paraIslemleri">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Customer/DepositMoney"><span class="sub-item">Para Yatırma</span></a></li>
+                                <li><a href="/MoneyTransactions/Withdraw"><span class="sub-item">Para Çekme</span></a></li>
+                                <li><a href="/Customer/Transfer"><span class="sub-item">EFT</span></a></li>
+                                <li><a href="/Customer/Transfer"><span class="sub-item">Havale</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#odemeler"><i class="fas fa-receipt"></i><p>Ödemeler</p><span class="caret"></span></a>
+                        <div class="collapse" id="odemeler">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Payments/Invoice"><span class="sub-item">Fatura Ödeme</span></a></li>
+                                <li><a href="/Payments/Dormitory"><span class="sub-item">Yurt Ödemesi</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#hesapAc"><i class="fas fa-plus-circle"></i><p>Hesap Açma</p><span class="caret"></span></a>
+                        <div class="collapse" id="hesapAc">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/OpenAccount/OpenCreditAccount"><span class="sub-item">Kredi Kartı Hesabı</span></a></li>
+                                <li><a href="/OpenAccount/OpenBankAccount"><span class="sub-item">Banka Hesabı</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                `,
+                "BankTeller": `
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#paraIslemleri"><i class="fas fa-money-bill"></i><p>Para İşlemleri</p><span class="caret"></span></a>
+                        <div class="collapse" id="paraIslemleri">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Customer/DepositMoney"><span class="sub-item">Para Yatırma</span></a></li>
+                                <li><a href="/MoneyTransactions/Withdraw"><span class="sub-item">Para Çekme</span></a></li>
+                                <li><a href="/Customer/Transfer"><span class="sub-item">EFT</span></a></li>
+                                <li><a href="/Customer/Transfer"><span class="sub-item">Havale</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#odemeler"><i class="fas fa-receipt"></i><p>Ödemeler</p><span class="caret"></span></a>
+                        <div class="collapse" id="odemeler">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Payments/Invoice"><span class="sub-item">Fatura Ödeme</span></a></li>
+                                <li><a href="/Payments/Dormitory"><span class="sub-item">Yurt Ödemesi</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#gise"><i class="fas fa-user-check"></i><p>Gişe İşlemleri</p><span class="caret"></span></a>
+                        <div class="collapse" id="gise">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Counter/BlockAccount"><span class="sub-item">Hesap Bloke</span></a></li>
+                                <li><a href="/Counter/AccountApproval"><span class="sub-item">Hesap Onayı</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                `,
+                "BranchManager": `
+                    <li class="nav-item">
+                        <a href="/BranchManagement/Index"><i class="fas fa-building"></i><p>Şube Yönetimi</p></a>
+                    </li>
+                `,
+                "SeniorManager": `
+                    <li class="nav-item">
+                        <a href="/BranchManagement/Index"><i class="fas fa-building"></i><p>Şube Yönetimi</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a data-bs-toggle="collapse" href="#sistem"><i class="fas fa-cogs"></i><p>Sistem Yönetimi</p><span class="caret"></span></a>
+                        <div class="collapse" id="sistem">
+                            <ul class="nav nav-collapse">
+                                <li><a href="/Employees/ManageEmployees"><span class="sub-item">Personel Yönetimi</span></a></li>
+                                <li><a href="/Employees/AddEmployee"><span class="sub-item">Personel Ekle</span></a></li>
+                            </ul>
+                        </div>
+                    </li>
+                `
+            };
+
+            sidebar.innerHTML = baseItems + (items[userRole] || '');
+        });
+    </script>
+
+    <!--   Core JS Files   -->
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/core/popper.min.js"></script>
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/core/bootstrap.min.js"></script>
+    <!-- Plugins -->
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/plugin/perfect-scrollbar.min.js"></script>
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/plugin/bootstrap-notify.min.js"></script>
+
+<!-- Kaiadmin JS -->
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/kaiadmin.min.js"></script>
+    <script src="~/UserPage/kaiadmin-lite-1.2.0/assets/js/scripts.min.js"></script>
+</body>

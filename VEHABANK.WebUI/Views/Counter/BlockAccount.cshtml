@@ -1,0 +1,87 @@
+@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Hesap Bloke Etme";
+}
+
+<div class="page-header position-relative" style="min-height: 48px;">
+    <h4 class="page-title d-inline-block align-middle">Hesap Bloke Etme</h4>
+    <button class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-2" style="z-index:2;" data-bs-toggle="modal" data-bs-target="#helpModal">
+        <i class="fas fa-question-circle me-1"></i>Yardım
+    </button>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Hesap Bloke Etme</h5>
+                </div>
+                <div class="card-body">
+                    <form id="blockAccountForm">
+                        <div class="mb-3">
+                            <label for="AccountNumber" class="form-label">Hesap Numarası</label>
+                            <input type="text" class="form-control" id="AccountNumber" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Bloke Et</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yardım Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="helpModalLabel"><i class="fas fa-question-circle me-2"></i>Yardım</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="mb-3">Hesap Bloke Etme İşlemi Nasıl Yapılır?</h6>
+                <ol class="mb-0">
+                    <li>Bloke edilecek hesabın numarasını giriniz</li>
+                    <li>"Bloke Et" butonuna tıklayınız</li>
+                    <li>İşlem başarılı olduğunda bilgilendirileceksiniz</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#blockAccountForm').on('submit', function (e) {
+                e.preventDefault();
+                var accountNumber = $('#AccountNumber').val();
+                $.ajax({
+                    url: 'https://localhost:7060/api/Account/block',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ AccountNumber: accountNumber }),
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    success: function (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Başarılı!',
+                            text: 'Hesap başarıyla bloke edildi.',
+                            showConfirmButton: false,
+                            timer: 2000
+                        }).then(function () {
+                            window.location.href = '/UserPage';
+                        });
+                    },
+                    error: function (xhr) {
+                        alert('Bir hata oluştu: ' + xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+} 

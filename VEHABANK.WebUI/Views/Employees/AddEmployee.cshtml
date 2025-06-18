@@ -1,0 +1,153 @@
+﻿@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Şubeye Personel Ekleme";
+}
+<br />
+<h2 class="text-center">Şubeye Personel Ekleme</h2>
+
+<style>
+    .short-input {
+        max-width: 400px;
+    }
+</style>
+
+<form id="AddEmployeeForm" method="post">
+    <div class="row">
+        <div class="col-md-6 offset-md-1 mb-3">
+            <label class="form-label">İsim</label>
+            <input type="text" class="form-control short-input" id="Name" name="Name" required />
+        </div>
+
+        <div class="col-md-5 mb-3">
+            <label class="form-label">Soyisim</label>
+            <input type="text" class="form-control short-input" id="Surname" name="Surname" required />
+        </div>
+
+        <div class="col-md-6 offset-md-1 mb-3">
+            <label class="form-label">Doğum Tarihi</label>
+            <input type="text" class="form-control short-input" id="BirthDate" name="BirthDate" required />
+        </div>
+
+        <div class="col-md-5 mb-3">
+            <label class="form-label">T.C. Kimlik No</label>
+            <input type="text" class="form-control short-input" id="IdentityNumber" name="IdentityNumber" required />
+        </div>
+
+        <div class="col-md-6 offset-md-1 mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control short-input" id="Email" name="Email" required />
+        </div>
+
+        <div class="col-md-5 mb-3">
+            <label class="form-label">Telefon</label>
+            <input type="text" class="form-control short-input" id="Phone" name="Phone" required />
+        </div>
+
+        <div class="col-md-6 offset-md-1 mb-3">
+            <label class="form-label">Şube</label>
+            <select class="form-select short-input" id="BranchId" name="BranchId" required>
+                <option value="">Şube seçiniz</option>
+            </select>
+        </div>
+
+        <div class="col-md-5 mb-3">
+            <label class="form-label">Personel Numarası</label>
+            <input type="text" class="form-control short-input" id="CustomerNumber" name="CustomerNumber" readonly />
+        </div>
+    </div>
+
+    <div class="col-md-6 offset-md-1 mb-3">
+        <label class="form-label">Yetki</label>
+        <select class="form-select short-input" id="Authorization" name="Authorization" required>
+            <option value="">Yetki Seçiniz</option>
+            <option value="0">Üst Düzey Yönetici</option>
+            <option value="1">Şube Yöneticisi</option>
+            <option value="2">Gişe Görevlisi</option>
+        </select>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg">Personel Ekle</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const branchSelect = document.getElementById("BranchId");
+            const numberInput = document.getElementById("CustomerNumber");
+            // const token = sessionStorage.getItem("jwtToken");
+
+            try {
+                // Şubeleri çek
+                // const branchRes = await fetch("https://localhost:7060/api/Branches/GetAllBranches");
+                const branchRes = await fetch("https://localhost:7060/api/Branches/GetAllBranches");
+                const branches = await branchRes.json();
+                branches.forEach(branch => {
+                    const option = document.createElement("option");
+                    option.value = branch.id;
+                    option.textContent = branch.name;
+                    branchSelect.appendChild(option);
+                });
+				console.log(branches);
+
+            } catch {
+                const option = document.createElement("option");
+                option.textContent = "Şubeler yüklenemedi";
+                branchSelect.appendChild(option);
+            }
+
+            try {
+                // Personel numarası üret
+                // const res = await fetch("https://localhost:7060/api/Auths/GenerateAndGetCustomerNumber");
+                const res = await fetch("https://localhost:7060/api/Auths/GenerateAndGetCustomerNumber");
+                const data = await res.text();
+				console.log(data);
+                numberInput.value = data;
+            } catch {
+                numberInput.value = "Hata";
+            }
+        });
+
+               document.getElementById("AddEmployeeForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+             // const token = sessionStorage.getItem("jwtToken");
+            const formData = new FormData(this);
+            const jsonData = {};
+            formData.forEach((value, key) => jsonData[key] = value);
+
+            try {
+                // const res = await fetch("https://localhost:7060/api/Employees/AddEmployee", {
+                const res = await fetch("https://localhost:7060/api/Employees/AddEmployee", {
+                    method: "POST",
+                    headers: {
+						// append("Authorization", `Bearer ${token}`),
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    alert("Personel başarıyla eklendi. Parola e-posta adresine gönderildi.");
+                } else {
+                    
+                    let errorMessage = "Bir hata oluştu.";
+
+                    if (result.errors) {
+                        const allErrors = Object.values(result.errors).flat();
+                        errorMessage = allErrors.join("\n");
+                    }
+
+                    alert("Hata:\n" + errorMessage);
+                }
+            } catch (err) {
+                console.error("Gönderim hatası:", err);
+                alert("İstek gönderilirken bir hata oluştu.");
+            }
+        });
+
+    </script>
+} 

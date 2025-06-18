@@ -1,0 +1,168 @@
+﻿@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Para Yatırma";
+}
+<br />
+<h2 class="text-center">Para Yatırma</h2>
+
+<div class="row justify-content-center">
+<div class="col-md-6">
+<form id="DepostiMoneyForm" method="post">
+        
+             <div class="mb-3">
+                <label class="form-label">Hesap No</label>
+                <select class="form-select short-input" id="AccountNumber" name="AccountNumber" required>
+                    <option value="">Hesap No seçiniz</option>
+                </select>
+            </div> 
+
+        <div class="mb-3">
+            <label class="form-label">İban</label>
+            <input type="text" class="form-control short-input" id="Iban" name="Iban" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Bakiye</label>
+            <input type="text" class="form-control short-input" id="Balance" name="Balance" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Müşteri Numarası</label>
+            <input type="text" class="form-control short-input" id="CustomerNumber" name="CustomerNumber" readonly />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Yatırılacak Miktar</label>
+            <input type="number" class="form-control short-input" id="Amount" name="Amount" required />
+        </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-primary btn-lg">Para Yatır</button>
+    </div>
+</form>
+</div>
+</div>
+
+
+  
+
+
+<script>
+    let allAccounts = [];
+
+    document.addEventListener("DOMContentLoaded", async function () {
+        const token = sessionStorage.getItem("jwtToken");
+        const decoded = parseJwt(token);
+        const userId = decoded?.UserId;
+        const role = decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+        const accountSelect = document.getElementById("AccountNumber");
+        const ibanInput = document.getElementById("Iban");
+        const balanceInput = document.getElementById("Balance");
+        const customerNumberInput = document.getElementById("CustomerNumber");
+
+        try {
+            // const res = await fetch("https://localhost:7060/api/Customer/GetAccountsForDeposit", {
+            const res = await fetch("https://localhost:7060/api/Customer/GetAccountsForDeposit", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            allAccounts = await res.json();
+
+            allAccounts.forEach(account => {
+                const option = document.createElement("option");
+                option.value = account.accountNumber;
+                option.textContent = account.accountNumber;
+                accountSelect.appendChild(option);
+            });
+        } catch (err) {
+            console.error("Hesaplar alınamadı:", err);
+            alert("Hesaplar yüklenemedi.");
+        }
+
+        accountSelect.addEventListener("change", function () {
+            const selected = allAccounts.find(acc => acc.accountNumber === this.value);
+            if (selected) {
+                ibanInput.value = selected.iban;
+                balanceInput.value = selected.balance;
+                customerNumberInput.value = selected.customerNumber;
+            } else {
+                ibanInput.value = "";
+                balanceInput.value = "";
+                customerNumberInput.value = "";
+            }
+        });
+
+        document.getElementById("DepostiMoneyForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const selectedAccount = allAccounts.find(a => a.accountNumber === accountSelect.value);
+            if (!selectedAccount) return alert("Geçerli bir hesap seçiniz.");
+
+            const performedByUserId = role === "BankTeller" ? decoded.UserId : selectedAccount.userId;
+
+            const dto = {
+                AccountId: selectedAccount.id,
+                AccountNumber: selectedAccount.accountNumber,
+                UserId: selectedAccount.userId,
+                IBAN: selectedAccount.iban,
+                Balance: selectedAccount.balance,
+                ToAccountId: selectedAccount.id,
+                FromAccountId: selectedAccount.id,
+                PerformedByUserId: performedByUserId,
+                Amount: parseFloat(document.getElementById("Amount").value),
+                Description: "Para yatırma",
+                Transaction: 1, // Enum: Deposit
+                TransferDate: new Date().toISOString()
+            };
+
+            try {
+                // const res = await fetch("https://localhost:7060/api/Customer/DepositMoney", {
+                const res = await fetch("https://localhost:7060/api/Customer/DepositMoney", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify(dto)
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    alert("Para yatırma başarılı. Güncel bakiye: " + (dto.Balance+parseFloat(document.getElementById("Amount").value)) + "₺");
+                    // window.location.href ="https://localhost:7205/UserPage/Index";
+                    window.location.href ="https://localhost:7205/UserPage/Index";
+
+                } else {
+                    let errorMessage = "Bir hata oluştu.";
+                    if (result.errors) {
+                        const allErrors = Object.values(result.errors).flat();
+                        errorMessage = allErrors.join("\n");
+                    } else if (result.message) {
+                        errorMessage = result.message;
+                    }
+                    alert("Hata:\n" + errorMessage);
+                }
+
+            } catch (err) {
+                console.error("Gönderim hatası:", err);
+                alert("İstek gönderilirken bir hata oluştu.");
+            }
+        });
+    });
+
+    function parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(decodeURIComponent(atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join('')));
+        } catch {
+            return null;
+        }
+    }
+</script>

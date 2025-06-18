@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VEHABANK.WebUI", "VEHABANK.WebUI\VEHABANK.WebUI.csproj", "{EDA08947-A484-4DBB-BE8B-9B9977110BF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VEHABANK.WebApi", "VEHABANK.WebApi\VEHABANK.WebApi.csproj", "{BE6E941F-98C9-4AD8-AA10-74873CC92455}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VEHABANK.Shared", "Shared\VEHABANK.Shared.csproj", "{0CDCA296-43B4-462D-B7D8-5D7BB13572EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDA08947-A484-4DBB-BE8B-9B9977110BF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDA08947-A484-4DBB-BE8B-9B9977110BF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDA08947-A484-4DBB-BE8B-9B9977110BF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDA08947-A484-4DBB-BE8B-9B9977110BF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE6E941F-98C9-4AD8-AA10-74873CC92455}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE6E941F-98C9-4AD8-AA10-74873CC92455}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE6E941F-98C9-4AD8-AA10-74873CC92455}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE6E941F-98C9-4AD8-AA10-74873CC92455}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CDCA296-43B4-462D-B7D8-5D7BB13572EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CDCA296-43B4-462D-B7D8-5D7BB13572EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CDCA296-43B4-462D-B7D8-5D7BB13572EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CDCA296-43B4-462D-B7D8-5D7BB13572EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

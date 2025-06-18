@@ -1,0 +1,180 @@
+﻿@model VEHABANK.Shared.OpenAccountDto
+
+@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Banka Hesabı Aç";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Banka Hesabı Aç</div>
+                <div class="card-category">
+                    Yeni bir banka hesabı açarak finansal işlemlerinizi güvenli, hızlı ve kolay bir şekilde gerçekleştirebilirsiniz.
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="form">
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Hesap Türü:</label>
+                        <div class="col-lg-4">
+                            <select class="form-select" id="accountType">
+                                <option value="0">Vadeli</option>
+                                <option value="1">Vadesiz</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Şube:</label>
+                        <div class="col-lg-4">
+                            <select class="form-select" id="branchSelect">
+                                <option value="">Şube seçin</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Para Birimi:</label>
+                        <div class="col-lg-4">
+                            <select class="form-select" id="currency">
+                                <option value="0">TRY</option>
+                                <option value="1">USD</option>
+                                <option value="2">EUR</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Kullanım Amacı:</label>
+                        <div class="col-lg-4">
+                            <select class="form-select" id="purpose">
+                                <option value="Maaş Alma">Maaş Alma</option>
+                                <option value="Birikim Yapma">Birikim Yapma</option>
+                                <option value="Günlük Harcamalar">Günlük Harcamalar</option>
+                                <option value="Ticari Faaliyetler">Ticari Faaliyetler</option>
+                                <option value="Yurtdışı İşlemler">Yurtdışı İşlemler</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Fiziksel Kart Talebi:</label>
+                        <div class="col-lg-4">
+                            <select class="form-select" id="cardRequest">
+                                <option value="true">Evet</option>
+                                <option value="false">Hayır</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- IBAN ve Hesap Numarası (readonly) -->
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">IBAN:</label>
+                        <div class="col-lg-4">
+                            <input type="text" class="form-control" id="IBAN" readonly />
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-lg-3 col-form-label text-end">Hesap Numarası:</label>
+                        <div class="col-lg-4">
+                            <input type="text" class="form-control" id="accountNumber" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="form-group row">
+                    <div class="col-lg-3"></div>
+                    <div class="col-lg-4">
+                        <button id="openAccountBtn" class="btn btn-success">Hesap Aç</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            try {
+                // const response = await fetch("https://localhost:7060/api/OpenAccount/GetAccountNumberAndIban");
+                const response = await fetch("https://localhost:7060/api/OpenAccount/GetAccountNumberAndIban");
+                const data = await response.json();
+                document.getElementById('accountNumber').value = data.accountNumber;
+                document.getElementById('IBAN').value = data.iban;
+            } catch (error) {
+                document.getElementById('accountNumber').value = "Hata";
+                document.getElementById('IBAN').value = "Hata";
+                console.error("IBAN/Hesap No alma hatası:", error);
+            }
+
+            await loadBranches();
+
+            document.getElementById("openAccountBtn").addEventListener("click", async function () {
+                const userId = sessionStorage.getItem('userId');
+                const branchId = document.getElementById('branchSelect').value;
+                const currency = document.getElementById('currency').value;
+                const accountNumber = document.getElementById('accountNumber').value;
+				const balance = 0;
+                const iban = document.getElementById('IBAN').value;
+
+                if (!branchId) {
+                    alert("Lütfen bir şube seçiniz.");
+                    return;
+                }
+
+                try {
+                    // const response = await fetch('https://localhost:7060/api/OpenAccount', {
+                    const response = await fetch('https://localhost:7060/api/OpenAccount', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            userId: userId,
+                            branchId: branchId,
+                            balance:0,
+                            currency: currency,
+                            accountNumber: accountNumber,
+                            iban: iban
+                        })
+                    });
+
+                    if (response.ok) {
+                        alert("Hesap başarıyla açıldı!");
+                    } else {
+                        alert("Hesap açma sırasında bir hata oluştu.");
+                    }
+                } catch (err) {
+                    alert("Sunucuya bağlanırken hata oluştu.");
+                    console.error(err);
+                }
+            });
+
+            async function loadBranches() {
+                try {
+                    // const response = await fetch('https://localhost:7060/api/Branches/GetAllBranches');
+                    const response = await fetch('https://localhost:7060/api/Branches/GetAllBranches');
+                    const branches = await response.json();
+
+                    const branchSelect = document.getElementById('branchSelect');
+                    branchSelect.innerHTML = '<option value="">Şube Seçin</option>';
+
+                    branches.forEach(branch => {
+                        const option = document.createElement('option');
+                        option.value = branch.id;
+                        option.text = branch.name;
+                        branchSelect.appendChild(option);
+                    });
+                } catch (err) {
+                    console.error("Şube listesi alınamadı:", err);
+                }
+            }
+        });
+    </script>
+}
+

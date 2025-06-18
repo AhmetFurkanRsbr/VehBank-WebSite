@@ -1,0 +1,49 @@
+@model VEHABANK.WebUI.Models.WithdrawModel
+
+@{
+    ViewData["Title"] = "Para Çekme";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Para Çekme İşlemi</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Withdraw" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="AccountNumber" class="control-label"></label>
+                            <input asp-for="AccountNumber" class="form-control" />
+                            <span asp-validation-for="AccountNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Amount" class="control-label"></label>
+                            <input asp-for="Amount" class="form-control" type="number" step="0.01" />
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary">Para Çek</button>
+                            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+} 

@@ -1,0 +1,189 @@
+﻿@{
+	ViewData["Title"] = "Login";
+	Layout = null;
+}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<title>VEHABANK-Giriş Yap</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!--===============================================================================================-->
+	<link rel="icon" type="image/png" href="/Login_v1/images/icons/favicon.ico" />
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/vendor/bootstrap/css/bootstrap.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/vendor/animate/animate.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/vendor/css-hamburgers/hamburgers.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/vendor/select2/select2.min.css">
+	<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="/Login_v1/css/util.css">
+	<link rel="stylesheet" type="text/css" href="/Login_v1/css/main.css">
+	<!--===============================================================================================-->
+</head>
+<body>
+
+	<div class="limiter">
+		<div class="container-login100">
+			<div class="wrap-login100">
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="/Login_v1/images/img-01.png" alt="IMG">
+				</div>
+
+				<form class="login100-form validate-form">
+					
+					<span class="login100-form-title">
+						Giriş Yap
+					</span>
+
+
+					<div class="wrap-input100 validate-input" data-validate="TC bu formatta olmaalı: 11111111111">
+						<input class="input100" type="text" name="email" placeholder="Tc Kimlik No/Müşteri No">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-id-card" aria-hidden="true"></i>
+						</span>
+					</div>
+
+
+					<div class="wrap-input100 validate-input" data-validate="Password is required" style="position: relative;">
+						<input class="input100" type="password" name="pass" id="passwordInput" placeholder="Parola">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+						<!-- 👁 Göz butonu -->
+						<button type="button" onclick="togglePasswordVisibility()" style="position: absolute; right: 10px; top: 10px; background: none; border: none;">
+							<i class="fa fa-eye" id="eyeIcon"></i>
+						</button>
+					</div>
+
+					<div class="container-login100-form-btn">
+						<button class="login100-form-btn">
+							Giriş Yap
+						</button>
+					</div>
+
+					<div class="text-center p-t-12">
+						<span class="txt1">
+							MüşteriNo / Parola
+						</span>
+						<a class="txt2" href="#">
+							Unuttum?
+						</a>
+					</div>
+
+					<div class="text-center p-t-136">
+						<a class="txt2" href="/Account/Register">
+							Hesap Oluştur
+							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	</body>
+
+
+
+	<!--===============================================================================================-->
+	<script src="/Login_v1/vendor/jquery/jquery-3.2.1.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="/Login_v1/vendor/bootstrap/js/popper.js"></script>
+	<script src="/Login_v1/vendor/bootstrap/js/bootstrap.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="/Login_v1/vendor/select2/select2.min.js"></script>
+	<!--===============================================================================================-->
+	<script src="/Login_v1/vendor/tilt/tilt.jquery.min.js"></script>
+	<script>
+		$('.js-tilt').tilt({
+			scale: 1.1
+		})
+	</script>
+	<!--===============================================================================================-->
+	<script src="/Login_v1/js/main.js"></script>
+	<script>
+		$(document).ready(function () {
+			$(".login100-form-btn").click(function (e) {
+				e.preventDefault(); // Formun normal submit işlemini engelle
+
+				var emailOrCustomerNo = $("input[name='email']").val();
+				var password = $("input[name='pass']").val();
+
+				// Verilerin doğru olup olmadığını kontrol et
+				if (!emailOrCustomerNo || !password) {
+					alert("Lütfen tüm alanları doldurun!");
+					return;
+				}
+
+				// API'ye veri gönderme
+				$.ajax({
+					//url: 'https://localhost:7060/api/AuthenticationJwt/Login',  // Login API endpoint'i
+				    url: 'https://localhost:7060/api/AuthenticationJwt/Login',  // Login API endpoint'i
+					type: 'POST',
+					contentType: 'application/json',
+					data: JSON.stringify({
+						// Identifier, hem TC kimlik numarası hem de müşteri numarası için geçerli
+						"Identifier": emailOrCustomerNo,
+						"Password": password
+					}),
+					success: function (data) {
+					var token2 = data.token || data.Token;
+					var accountId = data.accountId || data.AccountId;
+					console.log("TOKEN:", token2);
+					console.log("ACCOUNT ID:", accountId);
+				if (token2) {
+						// Token'ı localStorage'a kaydediyoruz
+						localStorage.setItem("jwtToken", token2);
+						if (accountId) {
+							localStorage.setItem("accountId", accountId);
+						}
+						console.log("TOKEN KAYDEDİLDİ:", localStorage.getItem("jwtToken"));
+						console.log("ACCOUNT ID KAYDEDİLDİ:", localStorage.getItem("accountId"));
+					}
+					// JWT Token'ı alıyoruz
+						if (data.token) {
+							var token = data.token;
+							// Token'ı session'a kaydediyoruz
+							sessionStorage.setItem("jwtToken", token);
+							sessionStorage.setItem("userId", data.userId);
+							alert("Giriş başarılı!");
+						//window.location.href = `https://localhost:7205/UserPage/Index/${data.userId}`; // Yönlendirme yapılacak sayfa
+					window.location.href = `https://localhost:7205/UserPage/Index/${data.userId}`; // Yönlendirme yapılacak sayfa
+						} else {
+							alert("Giriş başarısız, lütfen tekrar deneyin.");
+						}
+					},
+					error: function (xhr, status, error) {
+						// Hata mesajını kullanıcıya gösterme
+						var errorMessage = xhr.responseJSON?.Message || "Giriş sırasında bir hata oluştu.";
+						alert(errorMessage);
+					}
+				});
+			});
+		});
+	</script>
+
+	<script>
+		function togglePasswordVisibility() {
+			const input = document.getElementById("passwordInput");
+			const icon = document.getElementById("eyeIcon");
+
+			if (input.type === "password") {
+				input.type = "text";
+				icon.classList.remove("fa-eye");
+				icon.classList.add("fa-eye-slash");
+			} else {
+				input.type = "password";
+				icon.classList.remove("fa-eye-slash");
+				icon.classList.add("fa-eye");
+			}
+		}
+	</script>
+
+

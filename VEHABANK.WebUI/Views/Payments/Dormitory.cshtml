@@ -1,0 +1,188 @@
+@{
+    Layout = "_UserPageLayout";
+    ViewData["Title"] = "Yurt Ödemesi";
+}
+
+<div class="page-header position-relative" style="min-height: 48px;">
+    <h4 class="page-title d-inline-block align-middle">Yurt Ödemesi</h4>
+    <button class="btn btn-outline-primary btn-sm position-absolute top-0 end-0 mt-2 me-2" style="z-index:2;" data-bs-toggle="modal" data-bs-target="#helpModal">
+        <i class="fas fa-question-circle me-1"></i>Yardım
+    </button>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Yurt Ödemesi</h5>
+                </div>
+                <div class="card-body">
+                    <form id="dormitoryForm">
+                        <div class="mb-3">
+                            <label for="IdentityNumber" class="form-label">TC Kimlik No</label>
+                            <input type="text" class="form-control" id="IdentityNumber" required oninput="fillDormitoryInfo()">
+                        </div>
+                        <div class="mb-3">
+                            <label for="Amount" class="form-label">Tutar</label>
+                            <input type="number" class="form-control" id="Amount" step="0.01" required readonly>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Ödeme Yap</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Ödeme Geçmişi</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Kimlik No</th>
+                                    <th>Tutar</th>
+                                    <th>Tarih</th>
+                                    <th>Durum</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="fw-bold">11111111111</span></td>
+                                    <td><span class="text-success fw-bold">1500 TL</span></td>
+                                    <td><i class="far fa-calendar-alt me-1"></i>2024-06-01</td>
+                                    <td><span class="badge bg-success">Ödendi</span></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="fw-bold">22222222222</span></td>
+                                    <td><span class="text-success fw-bold">1750 TL</span></td>
+                                    <td><i class="far fa-calendar-alt me-1"></i>2024-05-10</td>
+                                    <td><span class="badge bg-success">Ödendi</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Yardım Modal -->
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="helpModalLabel"><i class="fas fa-question-circle me-2"></i>Yardım</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="mb-3">Yurt Ödemesi İşlemi Nasıl Yapılır?</h6>
+                <ol class="mb-0">
+                    <li>TC Kimlik numaranızı giriniz (11 haneli)</li>
+                    <li>Sistem otomatik olarak ödeme tutarını getirecektir</li>
+                    <li>Tutarı kontrol ediniz</li>
+                    <li>"Yurt Ödemesini Yap" butonuna tıklayınız</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Placeholder ve input hizalama düzeltmesi -->
+<style>
+    .input-group .form-control {
+        min-height: 48px;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-left: 0 !important;
+        font-size: 1rem;
+        box-shadow: none;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    .input-group .input-group-text {
+        min-height: 48px;
+        font-size: 1rem;
+        align-items: center;
+        background: #f8f9fa;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+    .input-group > .input-group-text:first-child {
+        border-top-left-radius: 0.5rem;
+        border-bottom-left-radius: 0.5rem;
+    }
+    .input-group > .form-control:last-child {
+        border-top-right-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+    }
+    input::placeholder {
+        color: #495057 !important;
+        opacity: 1 !important;
+        font-weight: 500 !important;
+    }
+</style>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
+    <script>
+        function fillDormitoryInfo() {
+            var idNo = document.getElementById('IdentityNumber').value;
+            var amount = '';
+            
+            if(idNo === '11111111111') {
+                amount = 1500;
+            } else if(idNo === '22222222222') {
+                amount = 1750;
+            } else if(idNo === '33333333333') {
+                amount = 2000;
+            } else {
+                amount = '';
+            }
+            
+            document.getElementById('Amount').value = amount;
+        }
+
+        $(document).ready(function () {
+            $('#dormitoryForm').on('submit', function (e) {
+                e.preventDefault();
+                var accountId = parseInt(localStorage.getItem('accountId'));
+                var dto = {
+                    AccountId: accountId,
+                    Amount: parseFloat($('#Amount').val()),
+                    Description: 'Yurt Ödemesi - ' + $('#IdentityNumber').val()
+                };
+                $.ajax({
+                    url: 'https://localhost:7060/api/Payments/pay-invoice',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(dto),
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('jwtToken')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Başarılı!',
+                                text: `Yurt ödeme işlemi başarıyla gerçekleştirildi. Yeni bakiyeniz: ${response.newBalance.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' })}`,
+                                showConfirmButton: false,
+                                timer: 2000
+                            }).then(function () {
+                                window.location.href = '/UserPage';
+                            });
+                        } else {
+                            alert('Ödeme işlemi başarısız oldu.');
+                        }
+                    },
+                    error: function () {
+                        alert('Bir hata oluştu.');
+                    }
+                });
+            });
+        });
+    </script>
+} 
