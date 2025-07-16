@@ -101,7 +101,7 @@ Bu proje; müşteri, gişe görevlisi, şube yöneticisi ve sistem yöneticisi r
 
 ```bash
 # Projeyi klonla
-git clone https://github.com/kullaniciadi/VehaBank-WebSite.git
+git clone https://github.com/AhmetFurkanRsbr/VehaBank-WebSite.git
 
 # Visual Studio ile aç
 # API solution içindeki appsettings.json dosyasından veritabanı bağlantısını yapılandır, mail doğrulama için smtp bilgilerini düzenle.
